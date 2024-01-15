@@ -13,28 +13,36 @@ class InvalidExprError extends Error {
 }
 
 function evalString(expr) {
-  if (/[\+\-\*\/]{2,}/.test(expr)) {
+  const operators = '+-/*';
+  
+  // Check for invalid characters
+  const invalidChars = expr.replace(/[\d\s\+\-\*\/]/g, '');
+  if (invalidChars.length > 0) {
+    throw new OutOfRangeError(invalidChars[0]);
+  }
+  
+  // Check for invalid combinations of operators
+  const invalidCombinations = expr.match(/[\+\-\/\*]{2,}/g);
+  if (invalidCombinations !== null) {
     throw new InvalidExprError();
   }
-
-  if (/^[\+\*\/]/.test(expr)) {
+  
+  // Check for invalid starting and ending operators
+  if (operators.includes(expr[0])) {
     throw new SyntaxError('Expression should not start with invalid operator');
   }
-
-  if (/[\+\*\/\-]$/.test(expr)) {
+  if (operators.includes(expr[expr.length - 1])) {
     throw new SyntaxError('Expression should not end with invalid operator');
   }
-
-  if (/[^0-9+\-*/\s]/.test(expr)) {
-    throw new OutOfRangeError(expr.match(/[^0-9+\-*/\s]/)[0]);
-  }
-
+  
+  // Evaluate the expression
   return eval(expr);
 }
 
+// Use the evalString function in a try-catch block
 try {
-  const result = evalString('1 + 2 * 3');
-  console.log(result); // 7
-} catch (e) {
-  console.error(e);
+  const result = evalString('2 + 3 * 4 - 5 / -2');
+  console.log(result); // Output: 16
+} catch (error) {
+  console.error(error);
 }
